@@ -1,0 +1,112 @@
+<html>
+    <head><title>Ajax Executer</title></head>
+    <body>
+        <h1>Run script via ajax in time intervals</h1>
+        <p>Leave this page opened in your browser until it finishes.</p>
+        <pre id="ajax-output"></pre>
+        <form id="controls">
+            Start number 
+            <input type="text" class="start_number" value="0" />
+            <br/>
+            End number
+            <input type="text" class="end_number" value="99999"/>
+            <br/>
+            End string
+            <input type="text" class="end_string" value="completed"/>
+            <br/>
+            Error string
+            <input type="text" class="error_string" value="(false)"/>
+            <br/>
+            Script URL
+            <input type="text" class="script_url" value="" placeholder="http://script.com?page=" />
+            <br/>
+            Time interval (ms)
+            <input type="text" class="interval" value="100000"/>
+            <br/>
+            <button class="start">Start</button>
+            <br/>
+            <label for="pause"><input type="checkbox" class="pause" id="pause"/> Pause</label>
+            <br/>
+            <label for="stop">
+            <input type="checkbox" class="stop" id="stop"/> Stop</label>
+        </form>
+        <div class="next-run">Next run:
+            <br/>
+            <span class="next-run-time"></span></div>
+        <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script>
+            function getCurrentTime() {
+                var objToday = new Date(),
+                        weekday = new Array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'),
+                        dayOfWeek = weekday[objToday.getDay()],
+                        domEnder = new Array('th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'),
+                        dayOfMonth = today + (objToday.getDate() < 10) ? '0' + objToday.getDate() + domEnder[objToday.getDate()] : objToday.getDate() + domEnder[parseFloat(("" + objToday.getDate()).substr(("" + objToday.getDate()).length - 1))],
+                        months = new Array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'),
+                        curMonth = months[objToday.getMonth()],
+                        curYear = objToday.getFullYear(),
+                        curHour = objToday.getHours() > 12 ? objToday.getHours() - 12 : (objToday.getHours() < 10 ? "0" + objToday.getHours() : objToday.getHours()),
+                        curMinute = objToday.getMinutes() < 10 ? "0" + objToday.getMinutes() : objToday.getMinutes(),
+                        curSeconds = objToday.getSeconds() < 10 ? "0" + objToday.getSeconds() : objToday.getSeconds(),
+                        curMeridiem = objToday.getHours() > 12 ? "PM" : "AM";
+                var today = curHour + ":" + curMinute + "." + curSeconds + curMeridiem + " " + dayOfWeek + " " + dayOfMonth + " of " + curMonth + ", " + curYear;
+                return today;
+            }
+
+            function addMinutes(currentDate, milliseconds) {
+                var nextTime = new Date(currentDate.getTime() + milliseconds);
+                return nextTime;
+            }
+            jQuery(document).ready(function () {
+                jQuery('#controls .start').click(function (e) {
+                    e.preventDefault();
+                    var page = parseInt( jQuery('#controls .start_number').val() );
+                    var ajaxRequestPending = 0;
+                    console.log('interval');
+                    console.log(jQuery('#controls .interval').val());
+                    var intvl = setInterval(function () {
+                        console.log( 'Interval executed' );
+                        if (jQuery('#controls .stop').is(':checked') || page > jQuery('#controls .end_number').val()) {
+                                        console.log( 'interval cleared');
+                            clearInterval(intvl);
+                        }
+                        console.log(jQuery('#controls .pause').is(':checked'));
+                        console.log(ajaxRequestPending);
+                        if (!jQuery('#controls .pause').is(':checked') && ajaxRequestPending < 1) {
+                            console.log('before ajax');
+                            console.log(page);
+                            ajaxRequestPending = 1;
+                            jQuery.get(jQuery('#controls .script_url').val() + page, function (response) {
+                                console.log(response);
+                                if (response) {
+                                    jQuery('#ajax-output').append(response + '<br/>');
+                                    console.log('after append');
+                                    console.log(page);
+
+                                    jQuery('.next-run-time').empty().text(addMinutes(new Date(), parseInt(jQuery('#controls .interval').val())));
+
+                                    if (jQuery('#controls .error_string').val()) {
+                                        if (response.indexOf(jQuery('#controls .error_string').val()) < 0) {
+                                            page++;
+                                        }
+                                    } else {
+                                        page++;
+                                    }
+                                    if( jQuery('#controls .end_string').val() ){
+                                    if (response.indexOf(jQuery('#controls .end_string').val() ) > -1 ) {
+                                        console.log( 'interval cleared');
+                                        clearInterval(intvl);
+                                    }
+                                }
+                                }
+                            }).always(function () {
+                                ajaxRequestPending = 0;
+                                console.log("ajax finished");
+                            });
+                        }
+                    }, parseInt( jQuery('#controls .interval').val()) );
+                });
+            });
+        </script>
+    </body>
+</html>
