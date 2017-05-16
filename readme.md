@@ -26,4 +26,4 @@ You can do this with Ajax Executer.
 **Jose Vega** - [VegaCorp](http://vegacorp.me)
 
 Some of my projects:
-* [WP Sheet Editor](https://wpsheeteditor.com/go/free-plugin-from-github)
+* [WP Sheet Editor](https://wpsheeteditor.com/go/free-plugin-from-github). Edit WooCommerce products, WordPress Posts, Pages, and Custom Post Types using a Spreadsheet. Free WordPress plugin.
